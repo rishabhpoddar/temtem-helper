@@ -105,10 +105,10 @@
         "fire": 1,
         "nature": 1,
         "electric": 1,
-        "mental": 2,
-        "digital": 0.5,
-        "melee": 1,
-        "crystal": 1,
+        "mental": 1,
+        "digital": 1,
+        "melee": 2,
+        "crystal": 0.5,
         "toxic": 1
     },
     "digital": {
