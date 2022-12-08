@@ -228,3 +228,11 @@ function calculateDefenceEffectiveness(defenceType: string, temtem: Temtem): num
     })
     return result;
 }
+
+function calculateAttackEffectivenessWithTemtem(temtemToAttack: Temtem, temtemToDefend: Temtem): number {
+    let result = -1;
+    temtemToAttack.type.forEach(attackType => {
+        result = Math.max(result, calculateAttackEffectiveness(attackType, temtemToDefend))
+    })
+    return result;
+}
