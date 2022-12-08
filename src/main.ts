@@ -25,13 +25,18 @@ if (opponentTemtem.length > 1) {
     console.log("Opponent 2: " + opponentTemtem[1].name + " | " + opponentTemtem[1].type[0] + " " + (opponentTemtem[1].type[1] === undefined ? "" : opponentTemtem[1].type[1]))
 }
 
+
+let attackTypeEffectivenessAgainstOpponents: { [key: string]: { [key: string]: number } } = {}
 allTypes.forEach(currType => {
-    console.log("\nFor type: " + currType)
-    console.log(opponentTemtem[0].name + ": " + calculateAttackEffectiveness(currType, opponentTemtem[0]));
+    let effectiveness: { [key: string]: number } = {}
+    effectiveness[opponentTemtem[0].name] = calculateAttackEffectiveness(currType, opponentTemtem[0])
     if (opponentTemtem.length > 1) {
-        console.log(opponentTemtem[1].name + ": " + calculateAttackEffectiveness(currType, opponentTemtem[1]));
+        effectiveness[opponentTemtem[1].name] = calculateAttackEffectiveness(currType, opponentTemtem[1])
     }
+    attackTypeEffectivenessAgainstOpponents[currType] = effectiveness
 })
+
+console.log(attackTypeEffectivenessAgainstOpponents)
 
 
 function calculateAttackEffectiveness(attackType: string, temtem: Temtem): number {
