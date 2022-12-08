@@ -2,12 +2,20 @@ import fs from "fs";
 
 const attackToDefenceAffectiveness: { [key: string]: { [key: string]: number } } = JSON.parse(fs.readFileSync("./attackToDefenceAffectiveness.json", { encoding: 'utf8', flag: 'r' }));
 
-const allTypes = Object.keys(attackToDefenceAffectiveness);
+// const allTypes = Object.keys(attackToDefenceAffectiveness);
 
 type Temtem = {
     type: string[],
-    name: string
+    name: string,
 }
+
+const myTemtem: Temtem[] = [{
+    type: ["electric"], name: "Ganki"
+}, {
+    type: ["electric"], name: "Ganki"
+}, {
+    type: ["melee", "electric"], name: "Baboong"
+}]
 
 const opponentTemtem: Temtem[] = []
 
@@ -21,25 +29,35 @@ for (let i = 2; i < 4; i++) {
 }
 
 let attackTypeEffectivenessAgainstOpponents: {
-    attackType: string, opponents: {
-        name: string, effectiveness: number
+    temtem: Temtem, opponents: {
+        name: string, effectiveness: number, attackTypeScores: { [key: string]: number }
     }[]
 }[] = []
-allTypes.forEach(currType => {
+myTemtem.forEach(currTemtem => {
+    let attackTypeScores: { [key: string]: number } = {}
+    currTemtem.type.forEach(i => {
+        attackTypeScores[i] = calculateAttackEffectiveness(i, opponentTemtem[0])
+    })
     let effectiveness: {
-        name: string, effectiveness: number
+        name: string, effectiveness: number, attackTypeScores: { [key: string]: number }
     }[] = [{
         name: opponentTemtem[0].name,
-        effectiveness: calculateAttackEffectiveness(currType, opponentTemtem[0])
+        effectiveness: calculateAttackEffectivenessWithTemtem(currTemtem, opponentTemtem[0]),
+        attackTypeScores
     }]
     if (opponentTemtem.length > 1) {
+        attackTypeScores = {}
+        currTemtem.type.forEach(i => {
+            attackTypeScores[i] = calculateAttackEffectiveness(i, opponentTemtem[1])
+        })
         effectiveness.push({
             name: opponentTemtem[1].name,
-            effectiveness: calculateAttackEffectiveness(currType, opponentTemtem[1])
+            effectiveness: calculateAttackEffectivenessWithTemtem(currTemtem, opponentTemtem[1]),
+            attackTypeScores
         })
     }
     attackTypeEffectivenessAgainstOpponents.push({
-        attackType: currType,
+        temtem: currTemtem,
         opponents: effectiveness
     })
 })
@@ -73,11 +91,14 @@ attackTypeEffectivenessAgainstOpponents.sort((a, b) => {
 
 console.log("TO ATTACK:")
 attackTypeEffectivenessAgainstOpponents.forEach(i => {
-    let opponentStr = ""
+    console.log(i.temtem.name + " => ");
     i.opponents.forEach(o => {
-        opponentStr += (o.name + " " + o.effectiveness + " | ")
+        let opponentStr = (o.name + "(" + o.effectiveness + ") => ")
+        Object.keys(o.attackTypeScores).forEach(k => {
+            opponentStr += k + "(" + o.attackTypeScores[k] + ") "
+        })
+        console.log("   " + opponentStr)
     })
-    console.log(i.attackType + " => " + opponentStr);
 })
 console.log("\n")
 
@@ -88,25 +109,25 @@ console.log("\n")
 ////////////////////////////////////////////////////
 
 let defendTypeEffectivenessAgainstOpponents: {
-    defendType: string, opponents: {
+    temtem: Temtem, opponents: {
         name: string, effectiveness: number
     }[]
 }[] = []
-allTypes.forEach(currType => {
+myTemtem.forEach(currTemtem => {
     let effectiveness: {
         name: string, effectiveness: number
     }[] = [{
         name: opponentTemtem[0].name,
-        effectiveness: calculateDefenceEffectiveness(currType, opponentTemtem[0])
+        effectiveness: calculateAttackEffectivenessWithTemtem(opponentTemtem[0], currTemtem)
     }]
     if (opponentTemtem.length > 1) {
         effectiveness.push({
             name: opponentTemtem[1].name,
-            effectiveness: calculateDefenceEffectiveness(currType, opponentTemtem[1])
+            effectiveness: calculateAttackEffectivenessWithTemtem(opponentTemtem[1], currTemtem)
         })
     }
     defendTypeEffectivenessAgainstOpponents.push({
-        defendType: currType,
+        temtem: currTemtem,
         opponents: effectiveness
     })
 })
@@ -144,7 +165,7 @@ defendTypeEffectivenessAgainstOpponents.forEach(i => {
     i.opponents.forEach(o => {
         opponentStr += (o.name + " " + o.effectiveness + " | ")
     })
-    console.log(i.defendType + " => " + opponentStr);
+    console.log(i.temtem.name + " => " + opponentStr);
 })
 console.log("\n")
 
@@ -172,7 +193,7 @@ attackTypeEffectivenessAgainstOpponents.forEach(i => {
         prevPositionMin = currPositionMin
         prevPositionMax = currPositionMax
     }
-    typeToPositionForAttack[i.attackType] = prevPosition
+    typeToPositionForAttack[i.temtem.name] = prevPosition
 })
 
 
@@ -195,14 +216,14 @@ defendTypeEffectivenessAgainstOpponents.forEach(i => {
         prevPositionMin = currPositionMin
         prevPositionMax = currPositionMax
     }
-    typeToPositionForDefend[i.defendType] = prevPosition
+    typeToPositionForDefend[i.temtem.name] = prevPosition
 })
 
-allTypes.sort((a, b) => {
-    let maxA = Math.max(typeToPositionForAttack[a], typeToPositionForDefend[a])
-    let minA = Math.min(typeToPositionForAttack[a], typeToPositionForDefend[a])
-    let maxB = Math.max(typeToPositionForAttack[b], typeToPositionForDefend[b])
-    let minB = Math.min(typeToPositionForAttack[b], typeToPositionForDefend[b])
+myTemtem.sort((a, b) => {
+    let maxA = Math.max(typeToPositionForAttack[a.name], typeToPositionForDefend[a.name])
+    let minA = Math.min(typeToPositionForAttack[a.name], typeToPositionForDefend[a.name])
+    let maxB = Math.max(typeToPositionForAttack[b.name], typeToPositionForDefend[b.name])
+    let minB = Math.min(typeToPositionForAttack[b.name], typeToPositionForDefend[b.name])
     if (maxA != maxB) {
         return maxA - maxB
     }
@@ -210,7 +231,7 @@ allTypes.sort((a, b) => {
 })
 
 console.log("TO ATTACK AND DEFEND")
-allTypes.forEach(i => console.log(i))
+myTemtem.forEach(i => console.log(i.name))
 
 
 function calculateAttackEffectiveness(attackType: string, temtem: Temtem): number {
