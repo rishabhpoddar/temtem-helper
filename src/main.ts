@@ -34,10 +34,10 @@ allTypes.forEach(currType => {
 })
 
 
-function calculateAttackEffectiveness(type: string, temtem: Temtem): number {
+function calculateAttackEffectiveness(attackType: string, temtem: Temtem): number {
     let result = 1;
-    temtem.type.forEach(temtemType => {
-        result = result * attackToDefenceAffectiveness[type][temtemType]
+    temtem.type.forEach(defenceType => {
+        result = result * attackToDefenceAffectiveness[attackType][defenceType]
     })
     return result;
 }
