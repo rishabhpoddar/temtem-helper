@@ -26,17 +26,46 @@ if (opponentTemtem.length > 1) {
 }
 
 
-let attackTypeEffectivenessAgainstOpponents: { [key: string]: { [key: string]: number } } = {}
+let attackTypeEffectivenessAgainstOpponents: {
+    attackType: string, opponents: {
+        name: string, effectiveness: number
+    }[]
+}[] = []
 allTypes.forEach(currType => {
-    let effectiveness: { [key: string]: number } = {}
-    effectiveness[opponentTemtem[0].name] = calculateAttackEffectiveness(currType, opponentTemtem[0])
+    let effectiveness: {
+        name: string, effectiveness: number
+    }[] = [{
+        name: opponentTemtem[0].name,
+        effectiveness: calculateAttackEffectiveness(currType, opponentTemtem[0])
+    }]
     if (opponentTemtem.length > 1) {
-        effectiveness[opponentTemtem[1].name] = calculateAttackEffectiveness(currType, opponentTemtem[1])
+        effectiveness.push({
+            name: opponentTemtem[1].name,
+            effectiveness: calculateAttackEffectiveness(currType, opponentTemtem[1])
+        })
     }
-    attackTypeEffectivenessAgainstOpponents[currType] = effectiveness
+    attackTypeEffectivenessAgainstOpponents.push({
+        attackType: currType,
+        opponents: effectiveness
+    })
 })
 
-console.log(attackTypeEffectivenessAgainstOpponents)
+// now we order the attack types. This will order based on most effective attack type against
+// either component to least effective.
+attackTypeEffectivenessAgainstOpponents.sort((a, b) => {
+    let resultA = -1;
+    a.opponents.forEach(o => {
+        resultA = Math.max(resultA, o.effectiveness)
+    })
+    let resultB = -1;
+    b.opponents.forEach(o => {
+        resultB = Math.max(resultB, o.effectiveness)
+    })
+
+    return resultB - resultA
+})
+
+console.log(JSON.stringify(attackTypeEffectivenessAgainstOpponents, null, 2))
 
 
 function calculateAttackEffectiveness(attackType: string, temtem: Temtem): number {
