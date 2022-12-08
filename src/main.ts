@@ -79,7 +79,7 @@ attackTypeEffectivenessAgainstOpponents.forEach(i => {
     })
     console.log(i.attackType + " => " + opponentStr);
 })
-console.log("\n\n")
+console.log("\n")
 
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -146,6 +146,72 @@ defendTypeEffectivenessAgainstOpponents.forEach(i => {
     })
     console.log(i.defendType + " => " + opponentStr);
 })
+console.log("\n")
+
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+let typeToPositionForAttack: { [key: string]: number } = {}
+
+let prevPosition = -1;
+let prevPositionMin = 100;
+let prevPositionMax = -1;
+attackTypeEffectivenessAgainstOpponents.forEach(i => {
+    let currPositionMin = i.opponents[0].effectiveness;
+    let currPositionMax = i.opponents[0].effectiveness;
+    if (i.opponents.length > 1) {
+        currPositionMin = Math.min(currPositionMin, i.opponents[1].effectiveness)
+    }
+    if (i.opponents.length > 1) {
+        currPositionMax = Math.max(currPositionMax, i.opponents[1].effectiveness)
+    }
+    if (currPositionMax != prevPositionMax || currPositionMin != prevPositionMin) {
+        prevPosition++;
+        prevPositionMin = currPositionMin
+        prevPositionMax = currPositionMax
+    }
+    typeToPositionForAttack[i.attackType] = prevPosition
+})
+
+
+let typeToPositionForDefend: { [key: string]: number } = {}
+
+prevPosition = -1;
+prevPositionMin = 100;
+prevPositionMax = -1;
+defendTypeEffectivenessAgainstOpponents.forEach(i => {
+    let currPositionMin = i.opponents[0].effectiveness;
+    let currPositionMax = i.opponents[0].effectiveness;
+    if (i.opponents.length > 1) {
+        currPositionMin = Math.min(currPositionMin, i.opponents[1].effectiveness)
+    }
+    if (i.opponents.length > 1) {
+        currPositionMax = Math.max(currPositionMax, i.opponents[1].effectiveness)
+    }
+    if (currPositionMax != prevPositionMax || currPositionMin != prevPositionMin) {
+        prevPosition++;
+        prevPositionMin = currPositionMin
+        prevPositionMax = currPositionMax
+    }
+    typeToPositionForDefend[i.defendType] = prevPosition
+})
+
+allTypes.sort((a, b) => {
+    let maxA = Math.max(typeToPositionForAttack[a], typeToPositionForDefend[a])
+    let minA = Math.min(typeToPositionForAttack[a], typeToPositionForDefend[a])
+    let maxB = Math.max(typeToPositionForAttack[b], typeToPositionForDefend[b])
+    let minB = Math.min(typeToPositionForAttack[b], typeToPositionForDefend[b])
+    if (maxA != maxB) {
+        return maxA - maxB
+    }
+    return minA - minB
+})
+
+console.log("TO ATTACK AND DEFEND")
+allTypes.forEach(i => console.log(i))
+
 
 function calculateAttackEffectiveness(attackType: string, temtem: Temtem): number {
     let result = 1;
