@@ -177,7 +177,7 @@ console.log("TO ATTACK:")
 attackTypeEffectivenessAgainstOpponents.forEach(i => {
     console.log(i.temtem.name + " => ");
     i.opponents.forEach(o => {
-        let opponentStr = o.name + " takes " + o.effectiveness + "x damage from " + i.temtem.name + " => "
+        let opponentStr = i.temtem.name + " can do " + o.effectiveness + "x damage to " + o.name + " => "
         Object.keys(o.attackTypeScores).forEach((k, i) => {
             opponentStr += k + "(" + o.attackTypeScores[k] + "x) " + (Object.keys(o.attackTypeScores).length === 2 && i === 0 ? " || " : "")
         })
@@ -249,10 +249,20 @@ myTemtem.sort((a, b) => {
     return minA - minB
 })
 
+
+let prevScore = myTemtem.length;
+prevPositionMin = 100;
+prevPositionMax = -1;
 console.log("TO ATTACK AND DEFEND")
 myTemtem.forEach(i => {
-    let score = myTemtem.length - (typeToPositionForAttack[i.name] * typeToPositionForDefend[i.name])
-    console.log(i.name + ". Overall score: " + score)
+    let currPositionMin = Math.min(typeToPositionForAttack[i.name], typeToPositionForDefend[i.name]);
+    let currPositionMax = Math.max(typeToPositionForAttack[i.name], typeToPositionForDefend[i.name]);
+    if (currPositionMax != prevPositionMax || currPositionMin != prevPositionMin) {
+        prevScore--;
+        prevPositionMin = currPositionMin
+        prevPositionMax = currPositionMax
+    }
+    console.log(i.name + ". Overall score: " + prevScore)
 })
 
 
