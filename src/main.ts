@@ -31,86 +31,6 @@ for (let i = 2; i < 4; i++) {
     }
 }
 
-let attackTypeEffectivenessAgainstOpponents: {
-    temtem: Temtem, opponents: {
-        name: string, effectiveness: number, attackTypeScores: { [key: string]: number }
-    }[]
-}[] = []
-myTemtem.forEach(currTemtem => {
-    let attackTypeScores: { [key: string]: number } = {}
-    currTemtem.type.forEach(i => {
-        attackTypeScores[i] = calculateAttackEffectiveness(i, opponentTemtem[0])
-    })
-    let effectiveness: {
-        name: string, effectiveness: number, attackTypeScores: { [key: string]: number }
-    }[] = [{
-        name: opponentTemtem[0].name,
-        effectiveness: calculateAttackEffectivenessWithTemtem(currTemtem, opponentTemtem[0]),
-        attackTypeScores
-    }]
-    if (opponentTemtem.length > 1) {
-        attackTypeScores = {}
-        currTemtem.type.forEach(i => {
-            attackTypeScores[i] = calculateAttackEffectiveness(i, opponentTemtem[1])
-        })
-        effectiveness.push({
-            name: opponentTemtem[1].name,
-            effectiveness: calculateAttackEffectivenessWithTemtem(currTemtem, opponentTemtem[1]),
-            attackTypeScores
-        })
-    }
-    attackTypeEffectivenessAgainstOpponents.push({
-        temtem: currTemtem,
-        opponents: effectiveness
-    })
-})
-
-// now we order the attack types. This will order based on most effective attack type against
-// either component to least effective.
-attackTypeEffectivenessAgainstOpponents.sort((a, b) => {
-    let maxEffectivenessA = a.opponents[0].effectiveness
-    let minEffectivenessA = a.opponents[0].effectiveness
-    if (a.opponents.length > 1) {
-        maxEffectivenessA = Math.max(maxEffectivenessA, a.opponents[1].effectiveness)
-    }
-    if (a.opponents.length > 1) {
-        minEffectivenessA = Math.min(minEffectivenessA, a.opponents[1].effectiveness)
-    }
-
-    let maxEffectivenessB = b.opponents[0].effectiveness
-    let minEffectivenessB = b.opponents[0].effectiveness
-    if (b.opponents.length > 1) {
-        maxEffectivenessB = Math.max(maxEffectivenessB, b.opponents[1].effectiveness)
-    }
-    if (b.opponents.length > 1) {
-        minEffectivenessB = Math.min(minEffectivenessB, b.opponents[1].effectiveness)
-    }
-
-    if (maxEffectivenessA != maxEffectivenessB) {
-        return maxEffectivenessB - maxEffectivenessA
-    }
-    return minEffectivenessB - minEffectivenessA
-})
-
-console.log("TO ATTACK:")
-attackTypeEffectivenessAgainstOpponents.forEach(i => {
-    console.log(i.temtem.name + " => ");
-    i.opponents.forEach(o => {
-        let opponentStr = "To attack " + o.name + "(" + o.effectiveness + "x) => "
-        Object.keys(o.attackTypeScores).forEach(k => {
-            opponentStr += k + "(" + o.attackTypeScores[k] + "x) "
-        })
-        console.log("   " + opponentStr)
-    })
-})
-console.log("\n")
-
-////////////////////////////////////////////////////
-////////////////////////////////////////////////////
-////////////////////////////////////////////////////
-////////////////////////////////////////////////////
-////////////////////////////////////////////////////
-
 let defendTypeEffectivenessAgainstOpponents: {
     temtem: Temtem, opponents: {
         name: string, effectiveness: number, defenseTypeScores: { [key: string]: number }
@@ -176,9 +96,9 @@ console.log("TO DEFEND:")
 defendTypeEffectivenessAgainstOpponents.forEach(i => {
     console.log(i.temtem.name + " => ");
     i.opponents.forEach(o => {
-        let opponentStr = "To defend from " + o.name + "(" + o.effectiveness + "x) => "
-        Object.keys(o.defenseTypeScores).forEach(k => {
-            opponentStr += k + "(" + o.defenseTypeScores[k] + "x) "
+        let opponentStr = o.name + " can do " + o.effectiveness + "x damage to " + i.temtem.name + " => "
+        Object.keys(o.defenseTypeScores).forEach((k, i) => {
+            opponentStr += k + "(" + o.defenseTypeScores[k] + "x) " + (Object.keys(o.defenseTypeScores).length === 2 && i === 0 ? " || " : "")
         })
         console.log("   " + opponentStr)
     })
@@ -190,6 +110,89 @@ console.log("\n")
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
+
+
+let attackTypeEffectivenessAgainstOpponents: {
+    temtem: Temtem, opponents: {
+        name: string, effectiveness: number, attackTypeScores: { [key: string]: number }
+    }[]
+}[] = []
+myTemtem.forEach(currTemtem => {
+    let attackTypeScores: { [key: string]: number } = {}
+    currTemtem.type.forEach(i => {
+        attackTypeScores[i] = calculateAttackEffectiveness(i, opponentTemtem[0])
+    })
+    let effectiveness: {
+        name: string, effectiveness: number, attackTypeScores: { [key: string]: number }
+    }[] = [{
+        name: opponentTemtem[0].name,
+        effectiveness: calculateAttackEffectivenessWithTemtem(currTemtem, opponentTemtem[0]),
+        attackTypeScores
+    }]
+    if (opponentTemtem.length > 1) {
+        attackTypeScores = {}
+        currTemtem.type.forEach(i => {
+            attackTypeScores[i] = calculateAttackEffectiveness(i, opponentTemtem[1])
+        })
+        effectiveness.push({
+            name: opponentTemtem[1].name,
+            effectiveness: calculateAttackEffectivenessWithTemtem(currTemtem, opponentTemtem[1]),
+            attackTypeScores
+        })
+    }
+    attackTypeEffectivenessAgainstOpponents.push({
+        temtem: currTemtem,
+        opponents: effectiveness
+    })
+})
+
+// now we order the attack types. This will order based on most effective attack type against
+// either component to least effective.
+attackTypeEffectivenessAgainstOpponents.sort((a, b) => {
+    let maxEffectivenessA = a.opponents[0].effectiveness
+    let minEffectivenessA = a.opponents[0].effectiveness
+    if (a.opponents.length > 1) {
+        maxEffectivenessA = Math.max(maxEffectivenessA, a.opponents[1].effectiveness)
+    }
+    if (a.opponents.length > 1) {
+        minEffectivenessA = Math.min(minEffectivenessA, a.opponents[1].effectiveness)
+    }
+
+    let maxEffectivenessB = b.opponents[0].effectiveness
+    let minEffectivenessB = b.opponents[0].effectiveness
+    if (b.opponents.length > 1) {
+        maxEffectivenessB = Math.max(maxEffectivenessB, b.opponents[1].effectiveness)
+    }
+    if (b.opponents.length > 1) {
+        minEffectivenessB = Math.min(minEffectivenessB, b.opponents[1].effectiveness)
+    }
+
+    if (maxEffectivenessA != maxEffectivenessB) {
+        return maxEffectivenessB - maxEffectivenessA
+    }
+    return minEffectivenessB - minEffectivenessA
+})
+
+console.log("TO ATTACK:")
+attackTypeEffectivenessAgainstOpponents.forEach(i => {
+    console.log(i.temtem.name + " => ");
+    i.opponents.forEach(o => {
+        let opponentStr = o.name + " takes " + o.effectiveness + "x damage from " + i.temtem.name + " => "
+        Object.keys(o.attackTypeScores).forEach((k, i) => {
+            opponentStr += k + "(" + o.attackTypeScores[k] + "x) " + (Object.keys(o.attackTypeScores).length === 2 && i === 0 ? " || " : "")
+        })
+        console.log("   " + opponentStr)
+    })
+})
+console.log("\n")
+
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+
+
 let typeToPositionForAttack: { [key: string]: number } = {}
 
 let prevPosition = -1;
@@ -247,21 +250,15 @@ myTemtem.sort((a, b) => {
 })
 
 console.log("TO ATTACK AND DEFEND")
-myTemtem.forEach(i => console.log(i.name))
+myTemtem.forEach(i => {
+    console.log(i.name)
+})
 
 
 function calculateAttackEffectiveness(attackType: string, temtem: Temtem): number {
     let result = 1;
     temtem.type.forEach(defenceType => {
         result = result * attackToDefenceAffectiveness[attackType][defenceType]
-    })
-    return result;
-}
-
-function calculateDefenceEffectiveness(defenceType: string, temtem: Temtem): number {
-    let result = -1;
-    temtem.type.forEach(attackType => {
-        result = Math.max(result, attackToDefenceAffectiveness[attackType][defenceType])
     })
     return result;
 }
