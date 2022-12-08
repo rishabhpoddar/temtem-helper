@@ -2,20 +2,23 @@ import fs from "fs";
 
 const attackToDefenceAffectiveness: { [key: string]: { [key: string]: number } } = JSON.parse(fs.readFileSync("./attackToDefenceAffectiveness.json", { encoding: 'utf8', flag: 'r' }));
 
-// const allTypes = Object.keys(attackToDefenceAffectiveness);
-
 type Temtem = {
     type: string[],
     name: string,
 }
 
-const myTemtem: Temtem[] = [{
-    type: ["electric"], name: "Ganki"
-}, {
-    type: ["electric"], name: "Ganki"
-}, {
-    type: ["toxic"], name: "Baboong"
-}]
+let mysquad: string[] = JSON.parse(fs.readFileSync("./mysquad.json", { encoding: 'utf8', flag: 'r' }));
+
+const myTemtem: Temtem[] = []
+
+mysquad.forEach(t => {
+    let info = JSON.parse(fs.readFileSync("./temtem/" + t.toLowerCase() + ".json", { encoding: 'utf8', flag: 'r' }))
+
+    myTemtem.push({
+        ...info,
+        name: t.toLowerCase()
+    })
+})
 
 const opponentTemtem: Temtem[] = []
 
