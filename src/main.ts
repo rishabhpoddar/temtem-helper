@@ -251,7 +251,8 @@ myTemtem.sort((a, b) => {
 
 console.log("TO ATTACK AND DEFEND")
 myTemtem.forEach(i => {
-    console.log(i.name)
+    let score = myTemtem.length - (typeToPositionForAttack[i.name] * typeToPositionForDefend[i.name])
+    console.log(i.name + ". Overall score: " + score)
 })
 
 
