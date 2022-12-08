@@ -1,11 +1,15 @@
 import fs from "fs";
 
-const attackToDefenceAffectiveness = JSON.parse(fs.readFileSync("./attackToDefenceAffectiveness.json", { encoding: 'utf8', flag: 'r' }));
+const attackToDefenceAffectiveness: { [key: string]: { [key: string]: number } } = JSON.parse(fs.readFileSync("./attackToDefenceAffectiveness.json", { encoding: 'utf8', flag: 'r' }));
 
-const opponentTemtem: {
+const allTypes = Object.keys(attackToDefenceAffectiveness);
+
+type Temtem = {
     type: string[],
     name: string
-}[] = []
+}
+
+const opponentTemtem: Temtem[] = []
 
 for (let i = 2; i < 4; i++) {
     if (process.argv[i] !== undefined) {
@@ -21,3 +25,19 @@ if (opponentTemtem.length > 1) {
     console.log("Opponent 2: " + opponentTemtem[1].name + " | " + opponentTemtem[1].type[0] + " " + (opponentTemtem[1].type[1] === undefined ? "" : opponentTemtem[1].type[1]))
 }
 
+allTypes.forEach(currType => {
+    console.log("\nFor type: " + currType)
+    console.log(opponentTemtem[0].name + ": " + calculateAttackEffectiveness(currType, opponentTemtem[0]));
+    if (opponentTemtem.length > 1) {
+        console.log(opponentTemtem[1].name + ": " + calculateAttackEffectiveness(currType, opponentTemtem[1]));
+    }
+})
+
+
+function calculateAttackEffectiveness(type: string, temtem: Temtem): number {
+    let result = 1;
+    temtem.type.forEach(temtemType => {
+        result = result * attackToDefenceAffectiveness[type][temtemType]
+    })
+    return result;
+}
