@@ -20,12 +20,6 @@ for (let i = 2; i < 4; i++) {
     }
 }
 
-console.log("Opponent 1: " + opponentTemtem[0].name + " | " + opponentTemtem[0].type[0] + " " + (opponentTemtem[0].type[1] === undefined ? "" : opponentTemtem[0].type[1]))
-if (opponentTemtem.length > 1) {
-    console.log("Opponent 2: " + opponentTemtem[1].name + " | " + opponentTemtem[1].type[0] + " " + (opponentTemtem[1].type[1] === undefined ? "" : opponentTemtem[1].type[1]))
-}
-
-
 let attackTypeEffectivenessAgainstOpponents: {
     attackType: string, opponents: {
         name: string, effectiveness: number
@@ -53,20 +47,38 @@ allTypes.forEach(currType => {
 // now we order the attack types. This will order based on most effective attack type against
 // either component to least effective.
 attackTypeEffectivenessAgainstOpponents.sort((a, b) => {
-    let resultA = -1;
-    a.opponents.forEach(o => {
-        resultA = Math.max(resultA, o.effectiveness)
-    })
-    let resultB = -1;
-    b.opponents.forEach(o => {
-        resultB = Math.max(resultB, o.effectiveness)
-    })
+    let maxEffectivenessA = a.opponents[0].effectiveness
+    let minEffectivenessA = a.opponents[0].effectiveness
+    if (a.opponents.length > 1) {
+        maxEffectivenessA = Math.max(maxEffectivenessA, a.opponents[1].effectiveness)
+    }
+    if (a.opponents.length > 1) {
+        minEffectivenessA = Math.min(minEffectivenessA, a.opponents[1].effectiveness)
+    }
 
-    return resultB - resultA
+    let maxEffectivenessB = b.opponents[0].effectiveness
+    let minEffectivenessB = b.opponents[0].effectiveness
+    if (b.opponents.length > 1) {
+        maxEffectivenessB = Math.max(maxEffectivenessB, b.opponents[1].effectiveness)
+    }
+    if (b.opponents.length > 1) {
+        minEffectivenessB = Math.min(minEffectivenessB, b.opponents[1].effectiveness)
+    }
+
+    if (maxEffectivenessA != maxEffectivenessB) {
+        return maxEffectivenessB - maxEffectivenessA
+    }
+    return minEffectivenessB - minEffectivenessA
 })
 
-console.log(JSON.stringify(attackTypeEffectivenessAgainstOpponents, null, 2))
 
+attackTypeEffectivenessAgainstOpponents.forEach(i => {
+    let opponentStr = ""
+    i.opponents.forEach(o => {
+        opponentStr += (o.name + " " + o.effectiveness + " | ")
+    })
+    console.log(i.attackType + " | " + opponentStr);
+})
 
 function calculateAttackEffectiveness(attackType: string, temtem: Temtem): number {
     let result = 1;
